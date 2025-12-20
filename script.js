@@ -1,606 +1,674 @@
-let hasUserInteracted = false;
+// script.js - Optimisé et commenté
+'use strict';
 
+// Configuration globale
+const CONFIG = {
+    visitorCount: 21234,
+    bioText: "Passionate developer specializing in game development and reverse engineering. Always exploring new technologies and creating innovative solutions.",
+    skillLevels: {
+        python: 87,
+        cpp: 75,
+        csharp: 80
+    },
+    themes: {
+        tiktok: { primary: '#00CED1', secondary: '#FF6B9E' },
+        home: { primary: '#22C55E', secondary: '#2DD4BF' },
+        hacker: { primary: '#22C55E', secondary: '#10B981' },
+        rain: { primary: '#3B82F6', secondary: '#60A5FA' },
+        anime: { primary: '#DC2626', secondary: '#F87171' },
+        car: { primary: '#EAB308', secondary: '#FACC15' }
+    }
+};
+
+// Éléments DOM avec cache
+let elements = {};
+let currentTheme = 'tiktok';
+let isSkillsVisible = false;
+let isMusicPlaying = false;
+let cursorTrails = [];
+let lastMousePos = { x: 0, y: 0 };
+let mouseVelocity = { x: 0, y: 0 };
+
+// Initialisation
 function initMedia() {
-  console.log("initMedia called");
-  const backgroundMusic = document.getElementById('background-music');
-  const backgroundVideo = document.getElementById('background');
-  if (!backgroundMusic || !backgroundVideo) {
-    console.error("Media elements not found");
-    return;
-  }
-  backgroundMusic.volume = 0.3;
-  backgroundVideo.muted = true; 
-
-  
-  backgroundVideo.play().catch(err => {
-    console.error("Failed to play background video:", err);
-  });
+    cacheElements();
+    setupEventListeners();
+    setupGSAPAnimations();
+    initializeProfile();
+    checkIfTouchDevice();
+    startIntroAnimation();
+    
+    // Initialiser Web Audio API pour meilleur contrôle audio
+    initAudioContext();
+    
+    // Observer pour les animations d'intersection
+    setupIntersectionObserver();
+    
+    // Initialiser le compteur de visiteurs
+    updateVisitorCount();
+    
+    // Optimiser pour les performances
+    optimizePerformance();
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-  const startScreen = document.getElementById('start-screen');
-  const startText = document.getElementById('start-text');
-  const profileName = document.getElementById('profile-name');
-  const profileBio = document.getElementById('profile-bio');
-  const visitorCount = document.getElementById('visitor-count');
-  const backgroundMusic = document.getElementById('background-music');
-  const tiktokButton = document.getElementById('tiktok-theme');
-  const resultsButtonContainer = document.getElementById('results-button-container');
-  const resultsButton = document.getElementById('results-theme');
-  const volumeIcon = document.getElementById('volume-icon');
-  const volumeSlider = document.getElementById('volume-slider');
-  const transparencySlider = document.getElementById('transparency-slider');
-  const backgroundVideo = document.getElementById('background');
-  const tiktokOverlay = document.getElementById('tiktok-overlay');
-  const glitchOverlay = document.querySelector('.glitch-overlay');
-  const profileBlock = document.getElementById('profile-block');
-  const skillsBlock = document.getElementById('skills-block');
-  const pythonBar = document.getElementById('python-bar');
-  const cppBar = document.getElementById('cpp-bar');
-  const csharpBar = document.getElementById('csharp-bar');
-  const resultsHint = document.getElementById('results-hint');
-  const profilePicture = document.querySelector('.profile-picture');
-  const profileContainer = document.querySelector('.profile-container');
-  const socialIcons = document.querySelectorAll('.social-icon');
-  const badges = document.querySelectorAll('.badge');
+function cacheElements() {
+    elements = {
+        startScreen: document.getElementById('start-screen'),
+        startText: document.getElementById('start-text'),
+        profileBlock: document.getElementById('profile-block'),
+        skillsBlock: document.getElementById('skills-block'),
+        profileName: document.getElementById('profile-name'),
+        profileBio: document.getElementById('profile-bio'),
+        profilePic: document.querySelector('.profile-picture'),
+        profileContainer: document.querySelector('.profile-container'),
+        visitorCount: document.getElementById('visitor-count'),
+        backgroundMusic: document.getElementById('background-music'),
+        backgroundVideo: document.getElementById('background'),
+        glitchOverlay: document.querySelector('.glitch-overlay'),
+        customCursor: document.querySelector('.custom-cursor'),
+        volumeSlider: document.getElementById('volume-slider'),
+        volumeIcon: document.getElementById('volume-icon'),
+        transparencySlider: document.getElementById('transparency-slider'),
+        resultsButton: document.getElementById('results-theme'),
+        resultsHint: document.getElementById('results-hint'),
+        resultsContainer: document.getElementById('results-button-container'),
+        themeButtons: {
+            tiktok: document.getElementById('tiktok-theme'),
+            home: document.getElementById('home-theme'),
+            hacker: document.getElementById('hacker-theme'),
+            rain: document.getElementById('rain-theme'),
+            anime: document.getElementById('anime-theme'),
+            car: document.getElementById('car-theme')
+        },
+        skillBars: {
+            python: document.getElementById('python-bar'),
+            cpp: document.getElementById('cpp-bar'),
+            csharp: document.getElementById('csharp-bar')
+        }
+    };
+}
 
-  
-  const cursor = document.querySelector('.custom-cursor');
-  const isTouchDevice = window.matchMedia("(pointer: coarse)").matches;
-
-  if (isTouchDevice) {
-    document.body.classList.add('touch-device');
+function setupEventListeners() {
+    // Écrans et navigation
+    elements.startScreen.addEventListener('click', handleStartClick);
+    elements.profilePic.addEventListener('click', handleProfileClick);
+    elements.resultsButton.addEventListener('click', toggleSkillsView);
     
-    document.addEventListener('touchstart', (e) => {
-      const touch = e.touches[0];
-      cursor.style.left = touch.clientX + 'px';
-      cursor.style.top = touch.clientY + 'px';
-      cursor.style.display = 'block';
-    });
-
-    document.addEventListener('touchmove', (e) => {
-      const touch = e.touches[0];
-      cursor.style.left = touch.clientX + 'px';
-      cursor.style.top = touch.clientY + 'px';
-      cursor.style.display = 'block';
-    });
-
-    document.addEventListener('touchend', () => {
-      cursor.style.display = 'none'; 
-    });
-  } else {
-
-    document.addEventListener('mousemove', (e) => {
-      cursor.style.left = e.clientX + 'px';
-      cursor.style.top = e.clientY + 'px';
-      cursor.style.display = 'block';
-    });
-
-    document.addEventListener('mousedown', () => {
-      cursor.style.transform = 'scale(0.8) translate(-50%, -50%)';
-    });
-
-    document.addEventListener('mouseup', () => {
-      cursor.style.transform = 'scale(1) translate(-50%, -50%)';
-    });
-  }
-
-
-  const startMessage = "Click here to see the motion baby";
-  let startTextContent = '';
-  let startIndex = 0;
-  let startCursorVisible = true;
-
-  function typeWriterStart() {
-    if (startIndex < startMessage.length) {
-      startTextContent = startMessage.slice(0, startIndex + 1);
-      startIndex++;
-    }
-    startText.textContent = startTextContent + (startCursorVisible ? '|' : ' ');
-    setTimeout(typeWriterStart, 100);
-  }
-
-
-  setInterval(() => {
-    startCursorVisible = !startCursorVisible;
-    startText.textContent = startTextContent + (startCursorVisible ? '|' : ' ');
-  }, 500);
-
-
-  function initializeVisitorCounter() {
-    let totalVisitors = localStorage.getItem('totalVisitorCount');
-    if (!totalVisitors) {
-      totalVisitors = 921234;
-      localStorage.setItem('totalVisitorCount', totalVisitors);
-    } else {
-      totalVisitors = parseInt(totalVisitors);
-    }
-
-    const hasVisited = localStorage.getItem('hasVisited');
-    if (!hasVisited) {
-      totalVisitors++;
-      localStorage.setItem('totalVisitorCount', totalVisitors);
-      localStorage.setItem('hasVisited', 'true');
-    }
-
-    visitorCount.textContent = totalVisitors.toLocaleString();
-  }
-
-
-  initializeVisitorCounter();
-
-
-  startScreen.addEventListener('click', () => {
-    startScreen.classList.add('hidden');
-    backgroundMusic.muted = false;
-    backgroundMusic.play().catch(err => {
-      console.error("Failed to play music after start screen click:", err);
-    });
-    profileBlock.classList.remove('hidden');
-    gsap.fromTo(profileBlock,
-      { opacity: 0, y: -50 },
-      { opacity: 1, y: 0, duration: 1, ease: 'power2.out', onComplete: () => {
-        profileBlock.classList.add('profile-appear');
-        profileContainer.classList.add('orbit');
-      }}
-    );
-    if (!isTouchDevice) {
-      try {
-        new cursorTrailEffect({
-          length: 10,
-          size: 8,
-          speed: 0.2
-        });
-        console.log("Cursor trail initialized");
-      } catch (err) {
-        console.error("Failed to initialize cursor trail effect:", err);
-      }
-    }
-    typeWriterName();
-    typeWriterBio();
-  });
-
-  startScreen.addEventListener('touchstart', (e) => {
-    e.preventDefault();
-    startScreen.classList.add('hidden');
-    backgroundMusic.muted = false;
-    backgroundMusic.play().catch(err => {
-      console.error("Failed to play music after start screen touch:", err);
-    });
-    profileBlock.classList.remove('hidden');
-    gsap.fromTo(profileBlock,
-      { opacity: 0, y: -50 },
-      { opacity: 1, y: 0, duration: 1, ease: 'power2.out', onComplete: () => {
-        profileBlock.classList.add('profile-appear');
-        profileContainer.classList.add('orbit');
-      }}
-    );
-    if (!isTouchDevice) {
-      try {
-        new cursorTrailEffect({
-          length: 10,
-          size: 8,
-          speed: 0.2
-        });
-        console.log("Cursor trail initialized");
-      } catch (err) {
-        console.error("Failed to initialize cursor trail effect:", err);
-      }
-    }
-    typeWriterName();
-    typeWriterBio();
-  });
-
-
-  const name = "JAQLIV";
-  let nameText = '';
-  let nameIndex = 0;
-  let isNameDeleting = false;
-  let nameCursorVisible = true;
-
-  function typeWriterName() {
-    if (!isNameDeleting && nameIndex < name.length) {
-      nameText = name.slice(0, nameIndex + 1);
-      nameIndex++;
-    } else if (isNameDeleting && nameIndex > 0) {
-      nameText = name.slice(0, nameIndex - 1);
-      nameIndex--;
-    } else if (nameIndex === name.length) {
-      isNameDeleting = true;
-      setTimeout(typeWriterName, 10000);
-      return;
-    } else if (nameIndex === 0) {
-      isNameDeleting = false;
-    }
-    profileName.textContent = nameText + (nameCursorVisible ? '|' : ' ');
-    if (Math.random() < 0.1) {
-      profileName.classList.add('glitch');
-      setTimeout(() => profileName.classList.remove('glitch'), 200);
-    }
-    setTimeout(typeWriterName, isNameDeleting ? 150 : 300);
-  }
-
-  setInterval(() => {
-    nameCursorVisible = !nameCursorVisible;
-    profileName.textContent = nameText + (nameCursorVisible ? '|' : ' ');
-  }, 500);
-
-
-  const bioMessages = [
-    "Fu*k Guns.lol & Fakecrime.bio got banned too often, so I created my own.",
-    "\"Hello, World!\""
-  ];
-  let bioText = '';
-  let bioIndex = 0;
-  let bioMessageIndex = 0;
-  let isBioDeleting = false;
-  let bioCursorVisible = true;
-
-  function typeWriterBio() {
-    if (!isBioDeleting && bioIndex < bioMessages[bioMessageIndex].length) {
-      bioText = bioMessages[bioMessageIndex].slice(0, bioIndex + 1);
-      bioIndex++;
-    } else if (isBioDeleting && bioIndex > 0) {
-      bioText = bioMessages[bioMessageIndex].slice(0, bioIndex - 1);
-      bioIndex--;
-    } else if (bioIndex === bioMessages[bioMessageIndex].length) {
-      isBioDeleting = true;
-      setTimeout(typeWriterBio, 2000);
-      return;
-    } else if (bioIndex === 0 && isBioDeleting) {
-      isBioDeleting = false;
-      bioMessageIndex = (bioMessageIndex + 1) % bioMessages.length;
-    }
-    profileBio.textContent = bioText + (bioCursorVisible ? '|' : ' ');
-    if (Math.random() < 0.1) {
-      profileBio.classList.add('glitch');
-      setTimeout(() => profileBio.classList.remove('glitch'), 200);
-    }
-    setTimeout(typeWriterBio, isBioDeleting ? 75 : 150);
-  }
-
-  setInterval(() => {
-    bioCursorVisible = !bioCursorVisible;
-    profileBio.textContent = bioText + (bioCursorVisible ? '|' : ' ');
-  }, 500);
-
-
-  let currentAudio = backgroundMusic;
-  let isMuted = false;
-
-  volumeIcon.addEventListener('click', () => {
-    isMuted = !isMuted;
-    currentAudio.muted = isMuted;
-    volumeIcon.innerHTML = isMuted
-      ? `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2"></path>`
-      : `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"></path>`;
-  });
-
-  volumeIcon.addEventListener('touchstart', (e) => {
-    e.preventDefault();
-    isMuted = !isMuted;
-    currentAudio.muted = isMuted;
-    volumeIcon.innerHTML = isMuted
-      ? `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2"></path>`
-      : `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"></path>`;
-  });
-
-  volumeSlider.addEventListener('input', () => {
-    currentAudio.volume = volumeSlider.value;
-    isMuted = false;
-    currentAudio.muted = false;
-    volumeIcon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"></path>`;
-  });
-
-
-  transparencySlider.addEventListener('input', () => {
-    const opacity = transparencySlider.value;
-    if (opacity == 0) {
-      profileBlock.style.background = 'rgba(0, 0, 0, 0)';
-      profileBlock.style.borderOpacity = '0';
-      profileBlock.style.borderColor = 'transparent';
-      profileBlock.style.backdropFilter = 'none';
-      skillsBlock.style.background = 'rgba(0, 0, 0, 0)';
-      skillsBlock.style.borderOpacity = '0';
-      skillsBlock.style.borderColor = 'transparent';
-      skillsBlock.style.backdropFilter = 'none';
-   
-      profileBlock.style.pointerEvents = 'auto';
-      socialIcons.forEach(icon => {
-        icon.style.pointerEvents = 'auto';
-        icon.style.opacity = '1';
-      });
-      badges.forEach(badge => {
-        badge.style.pointerEvents = 'auto';
-        badge.style.opacity = '1';
-      });
-      profilePicture.style.pointerEvents = 'auto';
-      profilePicture.style.opacity = '1';
-      profileName.style.opacity = '1';
-      profileBio.style.opacity = '1';
-      visitorCount.style.opacity = '1';
-    } else {
-      profileBlock.style.background = `rgba(0, 0, 0, ${opacity})`;
-      profileBlock.style.borderOpacity = opacity;
-      profileBlock.style.borderColor = '';
-      profileBlock.style.backdropFilter = `blur(${10 * opacity}px)`;
-      skillsBlock.style.background = `rgba(0, 0, 0, ${opacity})`;
-      skillsBlock.style.borderOpacity = opacity;
-      skillsBlock.style.borderColor = '';
-      skillsBlock.style.backdropFilter = `blur(${10 * opacity}px)`;
-      profileBlock.style.pointerEvents = 'auto';
-      socialIcons.forEach(icon => {
-        icon.style.pointerEvents = 'auto';
-        icon.style.opacity = '1';
-      });
-      badges.forEach(badge => {
-        badge.style.pointerEvents = 'auto';
-        badge.style.opacity = '1';
-      });
-      profilePicture.style.pointerEvents = 'auto';
-      profilePicture.style.opacity = '1';
-      profileName.style.opacity = '1';
-      profileBio.style.opacity = '1';
-      visitorCount.style.opacity = '1';
-    }
-  });
-
-
-  function switchTheme(videoSrc, audio, themeClass, overlay = null, overlayOverProfile = false) {
-    let primaryColor;
-    switch (themeClass) {
-      case 'tiktok-theme':
-        primaryColor = '#22C55E';
-        break;
-      default:
-        primaryColor = '#22C55E';
-    }
-    document.documentElement.style.setProperty('--primary-color', primaryColor);
-
-    gsap.to(backgroundVideo, {
-      opacity: 0,
-      duration: 0.5,
-      ease: 'power2.in',
-      onComplete: () => {
-        backgroundVideo.src = videoSrc;
-
-        if (currentAudio) {
-          currentAudio.pause();
-          currentAudio.currentTime = 0;
+    // Contrôles de thème
+    Object.keys(elements.themeButtons).forEach(theme => {
+        if (elements.themeButtons[theme]) {
+            elements.themeButtons[theme].addEventListener('click', () => switchTheme(theme));
         }
-        currentAudio = audio;
-        currentAudio.volume = volumeSlider.value;
-        currentAudio.muted = isMuted;
-        currentAudio.play().catch(err => console.error("Failed to play theme music:", err));
-
-        document.body.classList.remove('tiktok-theme');
-        document.body.classList.add(themeClass);
-
-        tiktokOverlay.classList.remove('hidden');
-        profileBlock.style.zIndex = overlayOverProfile ? 10 : 20;
-        skillsBlock.style.zIndex = overlayOverProfile ? 10 : 20;
-
-        resultsButtonContainer.classList.remove('hidden');
-
-        gsap.to(backgroundVideo, {
-          opacity: 1,
-          duration: 0.5,
-          ease: 'power2.out',
-          onComplete: () => {
-            profileContainer.classList.remove('orbit');
-            void profileContainer.offsetWidth;
-            profileContainer.classList.add('orbit');
-          }
-        });
-      }
     });
-  }
-
-
-  tiktokButton.addEventListener('click', () => {
-    switchTheme('assets/tiktok.mp4', backgroundMusic, 'tiktok-theme', tiktokOverlay, false);
-  });
-  tiktokButton.addEventListener('touchstart', (e) => {
-    e.preventDefault();
-    switchTheme('assets/tiktok.mp4', backgroundMusic, 'tiktok-theme', tiktokOverlay, false);
-  });
-
- 
-  function handleTilt(e, element) {
-    const rect = element.getBoundingClientRect();
-    const centerX = rect.left + rect.width / 2;
-    const centerY = rect.top + rect.height / 2;
-    let clientX, clientY;
-
-    if (e.type === 'touchmove') {
-      clientX = e.touches[0].clientX;
-      clientY = e.touches[0].clientY;
-    } else {
-      clientX = e.clientX;
-      clientY = e.clientY;
+    
+    // Contrôles audio et transparence
+    elements.volumeSlider.addEventListener('input', handleVolumeChange);
+    elements.transparencySlider.addEventListener('input', handleTransparencyChange);
+    
+    // Gestion du curseur
+    if (!document.body.classList.contains('touch-device')) {
+        document.addEventListener('mousemove', handleMouseMove);
+        document.addEventListener('mousedown', handleMouseDown);
+        document.addEventListener('mouseup', handleMouseUp);
     }
-
-    const mouseX = clientX - centerX;
-    const mouseY = clientY - centerY;
-
-    const maxTilt = 15;
-    const tiltX = (mouseY / rect.height) * maxTilt;
-    const tiltY = -(mouseX / rect.width) * maxTilt;
-
-    gsap.to(element, {
-      rotationX: tiltX,
-      rotationY: tiltY,
-      duration: 0.3,
-      ease: 'power2.out',
-      transformPerspective: 1000
+    
+    // Gestion du clavier
+    document.addEventListener('keydown', handleKeyDown);
+    
+    // Optimisation du scroll
+    document.addEventListener('scroll', throttle(handleScroll, 100), { passive: true });
+    
+    // Prévention du menu contextuel sur les éléments interactifs
+    document.querySelectorAll('.theme-button, .social-icon, .badge-container').forEach(el => {
+        el.addEventListener('contextmenu', e => e.preventDefault());
     });
-  }
+    
+    // Gestion de la visibilité de la page
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+}
 
-  profileBlock.addEventListener('mousemove', (e) => handleTilt(e, profileBlock));
-  profileBlock.addEventListener('touchmove', (e) => {
-    e.preventDefault();
-    handleTilt(e, profileBlock);
-  });
-
-  skillsBlock.addEventListener('mousemove', (e) => handleTilt(e, skillsBlock));
-  skillsBlock.addEventListener('touchmove', (e) => {
-    e.preventDefault();
-    handleTilt(e, skillsBlock);
-  });
-
-  profileBlock.addEventListener('mouseleave', () => {
-    gsap.to(profileBlock, {
-      rotationX: 0,
-      rotationY: 0,
-      duration: 0.5,
-      ease: 'power2.out'
+function setupGSAPAnimations() {
+    // Animation d'entrée du profil
+    gsap.registerEffect({
+        name: "slideIn",
+        effect: (targets, config) => {
+            return gsap.fromTo(targets,
+                { opacity: 0, y: 50, scale: 0.9 },
+                { opacity: 1, y: 0, scale: 1, duration: 0.8, ease: "back.out(1.7)" }
+            );
+        }
     });
-  });
-  profileBlock.addEventListener('touchend', () => {
-    gsap.to(profileBlock, {
-      rotationX: 0,
-      rotationY: 0,
-      duration: 0.5,
-      ease: 'power2.out'
+    
+    // Animation des barres de compétences
+    gsap.registerEffect({
+        name: "skillBarFill",
+        effect: (targets, config) => {
+            return gsap.to(targets, {
+                width: `${config.percent}%`,
+                duration: 1.5,
+                ease: "power2.out",
+                delay: config.delay || 0
+            });
+        }
     });
-  });
+}
 
-  skillsBlock.addEventListener('mouseleave', () => {
-    gsap.to(skillsBlock, {
-      rotationX: 0,
-      rotationY: 0,
-      duration: 0.5,
-      ease: 'power2.out'
+function initializeProfile() {
+    // Définir la bio
+    elements.profileBio.textContent = CONFIG.bioText;
+    
+    // Appliquer le thème initial
+    switchTheme('tiktok');
+    
+    // Initialiser les barres de compétences (cachées au début)
+    Object.keys(CONFIG.skillLevels).forEach(skill => {
+        if (elements.skillBars[skill]) {
+            elements.skillBars[skill].style.width = '0%';
+        }
     });
-  });
-  skillsBlock.addEventListener('touchend', () => {
-    gsap.to(skillsBlock, {
-      rotationX: 0,
-      rotationY: 0,
-      duration: 0.5,
-      ease: 'power2.out'
+}
+
+function startIntroAnimation() {
+    // Animation de texte d'introduction
+    const introText = "Welcome to D3M0N's Profile";
+    let charIndex = 0;
+    
+    function typeWriter() {
+        if (charIndex < introText.length) {
+            elements.startText.textContent += introText.charAt(charIndex);
+            charIndex++;
+            setTimeout(typeWriter, 50);
+        } else {
+            elements.startText.style.animation = "pulse 2s infinite";
+        }
+    }
+    
+    typeWriter();
+}
+
+function handleStartClick() {
+    // Animation de sortie de l'écran de démarrage
+    gsap.to(elements.startScreen, {
+        opacity: 0,
+        duration: 0.5,
+        ease: "power2.in",
+        onComplete: () => {
+            elements.startScreen.style.display = 'none';
+            showProfile();
+        }
     });
-  });
+}
 
+function showProfile() {
+    // Afficher le profil avec animation
+    elements.profileBlock.classList.add('profile-appear');
+    elements.profileBlock.style.opacity = '1';
+    elements.resultsContainer.classList.remove('hidden');
+    
+    // Jouer la musique de fond
+    playBackgroundMusic();
+}
 
-  profilePicture.addEventListener('mouseenter', () => {
-    glitchOverlay.style.opacity = '1';
+function handleProfileClick() {
+    // Animation du clic sur la photo de profil
+    elements.profileContainer.classList.add('fast-orbit');
     setTimeout(() => {
-      glitchOverlay.style.opacity = '0';
+        elements.profileContainer.classList.remove('fast-orbit');
     }, 500);
-  });
+    
+    // Effet glitch
+    triggerGlitchEffect();
+}
 
-
-  profilePicture.addEventListener('click', () => {
-    profileContainer.classList.remove('fast-orbit');
-    profileContainer.classList.remove('orbit');
-    void profileContainer.offsetWidth;
-    profileContainer.classList.add('fast-orbit');
+function triggerGlitchEffect() {
+    elements.glitchOverlay.style.opacity = '0.5';
+    elements.profileBlock.classList.add('glitch');
+    
     setTimeout(() => {
-      profileContainer.classList.remove('fast-orbit');
-      void profileContainer.offsetWidth;
-      profileContainer.classList.add('orbit');
-    }, 500);
-  });
+        elements.glitchOverlay.style.opacity = '0';
+        elements.profileBlock.classList.remove('glitch');
+    }, 200);
+}
 
-  profilePicture.addEventListener('touchstart', (e) => {
-    e.preventDefault();
-    profileContainer.classList.remove('fast-orbit');
-    profileContainer.classList.remove('orbit');
-    void profileContainer.offsetWidth;
-    profileContainer.classList.add('fast-orbit');
-    setTimeout(() => {
-      profileContainer.classList.remove('fast-orbit');
-      void profileContainer.offsetWidth;
-      profileContainer.classList.add('orbit');
-    }, 500);
-  });
-
- 
-  let isShowingSkills = false;
-  resultsButton.addEventListener('click', () => {
-    if (!isShowingSkills) {
-      gsap.to(profileBlock, {
-        x: -100,
-        opacity: 0,
+function switchTheme(theme) {
+    // Mettre à jour le thème actuel
+    currentTheme = theme;
+    
+    // Mettre à jour les classes du body
+    document.body.className = `${theme}-theme`;
+    
+    // Mettre à jour les couleurs CSS
+    updateThemeColors();
+    
+    // Effet de transition
+    gsap.to(document.body, {
         duration: 0.5,
-        ease: 'power2.in',
-        onComplete: () => {
-          profileBlock.classList.add('hidden');
-          skillsBlock.classList.remove('hidden');
-          gsap.fromTo(skillsBlock,
-            { x: 100, opacity: 0 },
-            { x: 0, opacity: 1, duration: 0.5, ease: 'power2.out' }
-          );
-          gsap.to(pythonBar, { width: '87%', duration: 2, ease: 'power2.out' });
-          gsap.to(cppBar, { width: '75%', duration: 2, ease: 'power2.out' });
-          gsap.to(csharpBar, { width: '80%', duration: 2, ease: 'power2.out' });
-        }
-      });
-      resultsHint.classList.remove('hidden');
-      isShowingSkills = true;
+        backgroundColor: CONFIG.themes[theme].primary + '10',
+        ease: "power2.out"
+    });
+    
+    // Mettre à jour le curseur
+    updateCursorColor();
+    
+    // Jouer un son de transition (optionnel)
+    playTransitionSound();
+}
+
+function updateThemeColors() {
+    const theme = CONFIG.themes[currentTheme];
+    document.documentElement.style.setProperty('--primary-color', theme.primary);
+    document.documentElement.style.setProperty('--secondary-color', theme.secondary);
+}
+
+function updateCursorColor() {
+    const hueMap = {
+        tiktok: '180deg',
+        home: '120deg',
+        hacker: '140deg',
+        rain: '220deg',
+        anime: '0deg',
+        car: '50deg'
+    };
+    
+    document.documentElement.style.setProperty('--cursor-hue', hueMap[currentTheme] || '180deg');
+}
+
+function toggleSkillsView() {
+    if (!isSkillsVisible) {
+        // Afficher les compétences
+        elements.profileBlock.classList.add('hidden');
+        elements.skillsBlock.classList.remove('hidden');
+        elements.resultsButton.textContent = 'Back to Profile';
+        elements.resultsHint.classList.add('show');
+        
+        // Animer les barres de compétences
+        setTimeout(() => {
+            Object.keys(CONFIG.skillLevels).forEach((skill, index) => {
+                if (elements.skillBars[skill]) {
+                    gsap.effects.skillBarFill(elements.skillBars[skill], {
+                        percent: CONFIG.skillLevels[skill],
+                        delay: index * 0.2
+                    });
+                }
+            });
+        }, 300);
     } else {
-      gsap.to(skillsBlock, {
-        x: 100,
-        opacity: 0,
-        duration: 0.5,
-        ease: 'power2.in',
-        onComplete: () => {
-          skillsBlock.classList.add('hidden');
-          profileBlock.classList.remove('hidden');
-          gsap.fromTo(profileBlock,
-            { x: -100, opacity: 0 },
-            { x: 0, opacity: 1, duration: 0.5, ease: 'power2.out' }
-          );
-        }
-      });
-      resultsHint.classList.add('hidden');
-      isShowingSkills = false;
+        // Revenir au profil
+        elements.skillsBlock.classList.add('hidden');
+        elements.profileBlock.classList.remove('hidden');
+        elements.resultsButton.textContent = 'View Results';
+        elements.resultsHint.classList.remove('show');
     }
-  });
+    
+    isSkillsVisible = !isSkillsVisible;
+    
+    // Cacher le hint après 3 secondes
+    if (isSkillsVisible) {
+        setTimeout(() => {
+            elements.resultsHint.classList.remove('show');
+        }, 3000);
+    }
+}
 
-  resultsButton.addEventListener('touchstart', (e) => {
-    e.preventDefault();
-    if (!isShowingSkills) {
-      gsap.to(profileBlock, {
-        x: -100,
-        opacity: 0,
-        duration: 0.5,
-        ease: 'power2.in',
-        onComplete: () => {
-          profileBlock.classList.add('hidden');
-          skillsBlock.classList.remove('hidden');
-          gsap.fromTo(skillsBlock,
-            { x: 100, opacity: 0 },
-            { x: 0, opacity: 1, duration: 0.5, ease: 'power2.out' }
-          );
-          gsap.to(pythonBar, { width: '87%', duration: 2, ease: 'power2.out' });
-          gsap.to(cppBar, { width: '75%', duration: 2, ease: 'power2.out' });
-          gsap.to(csharpBar, { width: '80%', duration: 2, ease: 'power2.out' });
+function initAudioContext() {
+    try {
+        // Créer un contexte audio pour un meilleur contrôle
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        if (AudioContext) {
+            const audioContext = new AudioContext();
+            const source = audioContext.createMediaElementSource(elements.backgroundMusic);
+            const gainNode = audioContext.createGain();
+            
+            source.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            // Sauvegarder le gainNode pour contrôle ultérieur
+            elements.gainNode = gainNode;
+            
+            // Reprendre le contexte audio sur interaction utilisateur
+            document.addEventListener('click', () => {
+                if (audioContext.state === 'suspended') {
+                    audioContext.resume();
+                }
+            }, { once: true });
         }
-      });
-      resultsHint.classList.remove('hidden');
-      isShowingSkills = true;
+    } catch (error) {
+        console.warn('Web Audio API not supported:', error);
+    }
+}
+
+function playBackgroundMusic() {
+    if (elements.backgroundMusic && !isMusicPlaying) {
+        elements.backgroundMusic.volume = elements.volumeSlider.value;
+        elements.backgroundMusic.play().then(() => {
+            isMusicPlaying = true;
+            updateVolumeIcon();
+        }).catch(error => {
+            console.warn('Audio playback failed:', error);
+            // La lecture automatique peut être bloquée, on attend une interaction
+            document.addEventListener('click', () => {
+                if (!isMusicPlaying) {
+                    elements.backgroundMusic.play();
+                    isMusicPlaying = true;
+                    updateVolumeIcon();
+                }
+            }, { once: true });
+        });
+    }
+}
+
+function handleVolumeChange() {
+    const volume = elements.volumeSlider.value;
+    
+    if (elements.gainNode) {
+        elements.gainNode.gain.value = volume;
     } else {
-      gsap.to(skillsBlock, {
-        x: 100,
-        opacity: 0,
-        duration: 0.5,
-        ease: 'power2.in',
-        onComplete: () => {
-          skillsBlock.classList.add('hidden');
-          profileBlock.classList.remove('hidden');
-          gsap.fromTo(profileBlock,
-            { x: -100, opacity: 0 },
-            { x: 0, opacity: 1, duration: 0.5, ease: 'power2.out' }
-          );
-        }
-      });
-      resultsHint.classList.add('hidden');
-      isShowingSkills = false;
+        elements.backgroundMusic.volume = volume;
     }
-  });
+    
+    updateVolumeIcon();
+    
+    // Sauvegarder le volume dans localStorage
+    localStorage.setItem('profileVolume', volume);
+}
 
+function updateVolumeIcon() {
+    const volume = parseFloat(elements.volumeSlider.value);
+    const path = elements.volumeIcon.querySelector('path');
+    
+    if (volume === 0) {
+        // Icône muet
+        path.setAttribute('d', 'M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z');
+    } else if (volume < 0.5) {
+        // Icône volume bas
+        path.setAttribute('d', 'M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z');
+    } else {
+        // Icône volume haut
+        path.setAttribute('d', 'M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z');
+    }
+}
 
-  typeWriterStart();
+function handleTransparencyChange() {
+    const transparency = elements.transparencySlider.value;
+    elements.profileBlock.style.opacity = transparency;
+    elements.skillsBlock.style.opacity = transparency;
+    
+    // Sauvegarder la transparence dans localStorage
+    localStorage.setItem('profileTransparency', transparency);
+}
+
+function handleMouseMove(event) {
+    const { clientX: x, clientY: y } = event;
+    
+    // Mettre à jour la position du curseur personnalisé
+    if (elements.customCursor) {
+        elements.customCursor.style.transform = `translate(${x}px, ${y}px) scale(${1 + mouseVelocity.x * 0.1})`;
+    }
+    
+    // Calculer la vitesse de la souris
+    const deltaX = x - lastMousePos.x;
+    const deltaY = y - lastMousePos.y;
+    mouseVelocity.x = deltaX;
+    mouseVelocity.y = deltaY;
+    lastMousePos = { x, y };
+    
+    // Créer des traînées de curseur
+    createCursorTrail(x, y);
+    
+    // Effets de parallaxe sur les éléments
+    applyParallaxEffect(x, y);
+}
+
+function createCursorTrail(x, y) {
+    // Limiter le nombre de traînées pour les performances
+    if (cursorTrails.length > 10) {
+        const oldTrail = cursorTrails.shift();
+        if (oldTrail && oldTrail.parentNode) {
+            oldTrail.parentNode.removeChild(oldTrail);
+        }
+    }
+    
+    // Créer une nouvelle traînée
+    const trail = document.createElement('div');
+    trail.className = 'cursor-trail-dot';
+    trail.style.left = `${x}px`;
+    trail.style.top = `${y}px`;
+    
+    document.body.appendChild(trail);
+    cursorTrails.push(trail);
+    
+    // Animer et supprimer la traînée
+    gsap.to(trail, {
+        opacity: 0,
+        scale: 0,
+        duration: 0.5,
+        ease: "power2.out",
+        onComplete: () => {
+            if (trail.parentNode) {
+                trail.parentNode.removeChild(trail);
+                const index = cursorTrails.indexOf(trail);
+                if (index > -1) cursorTrails.splice(index, 1);
+            }
+        }
+    });
+}
+
+function applyParallaxEffect(x, y) {
+    // Effet de parallaxe léger sur le bloc de profil
+    const centerX = window.innerWidth / 2;
+    const centerY = window.innerHeight / 2;
+    const moveX = (x - centerX) * 0.01;
+    const moveY = (y - centerY) * 0.01;
+    
+    gsap.to(elements.profileBlock, {
+        x: moveX,
+        y: moveY,
+        duration: 0.5,
+        ease: "power2.out"
+    });
+}
+
+function handleMouseDown() {
+    // Effet de clic sur le curseur
+    if (elements.customCursor) {
+        elements.customCursor.style.transform += ' scale(0.8)';
+    }
+}
+
+function handleMouseUp() {
+    // Restaurer le curseur
+    if (elements.customCursor) {
+        elements.customCursor.style.transform = elements.customCursor.style.transform.replace(' scale(0.8)', '');
+    }
+}
+
+function handleKeyDown(event) {
+    // Raccourcis clavier
+    switch(event.key) {
+        case 'Escape':
+            if (isSkillsVisible) {
+                toggleSkillsView();
+            }
+            break;
+        case ' ':
+            event.preventDefault();
+            toggleBackgroundMusic();
+            break;
+        case '1':
+        case '2':
+        case '3':
+        case '4':
+        case '5':
+        case '6':
+            const themes = ['tiktok', 'home', 'hacker', 'rain', 'anime', 'car'];
+            const themeIndex = parseInt(event.key) - 1;
+            if (themes[themeIndex]) {
+                switchTheme(themes[themeIndex]);
+            }
+            break;
+    }
+}
+
+function toggleBackgroundMusic() {
+    if (isMusicPlaying) {
+        elements.backgroundMusic.pause();
+    } else {
+        elements.backgroundMusic.play();
+    }
+    isMusicPlaying = !isMusicPlaying;
+    updateVolumeIcon();
+}
+
+function updateVisitorCount() {
+    // Simuler une augmentation progressive du compteur
+    let count = parseInt(elements.visitorCount.textContent);
+    const target = count + Math.floor(Math.random() * 10) + 1;
+    
+    gsap.to({ count }, {
+        count: target,
+        duration: 2,
+        ease: "power2.out",
+        onUpdate: function() {
+            elements.visitorCount.textContent = Math.floor(this.targets()[0].count);
+        },
+        onComplete: () => {
+            // Mettre à jour périodiquement
+            setTimeout(updateVisitorCount, 5000);
+        }
+    });
+}
+
+function checkIfTouchDevice() {
+    if ('ontouchstart' in window || navigator.maxTouchPoints) {
+        document.body.classList.add('touch-device');
+    }
+}
+
+function setupIntersectionObserver() {
+    // Observer pour les animations d'apparition
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('animate-in');
+            }
+        });
+    }, {
+        threshold: 0.1
+    });
+    
+    // Observer les éléments qui doivent apparaître
+    document.querySelectorAll('.skill, .badge-container, .social-icon').forEach(el => {
+        observer.observe(el);
+    });
+}
+
+function handleScroll() {
+    // Effets de défilement
+    const scrollY = window.scrollY;
+    const parallaxValue = scrollY * 0.5;
+    
+    if (elements.backgroundVideo) {
+        elements.backgroundVideo.style.transform = `translateY(${parallaxValue}px) scale(1.02)`;
+    }
+}
+
+function handleVisibilityChange() {
+    if (document.hidden) {
+        // Pause la musique quand la page n'est pas visible
+        if (isMusicPlaying) {
+            elements.backgroundMusic.pause();
+        }
+    } else {
+        // Reprend la musique quand la page redevient visible
+        if (isMusicPlaying) {
+            elements.backgroundMusic.play();
+        }
+    }
+}
+
+function optimizePerformance() {
+    // Optimisations de performance
+    if ('requestIdleCallback' in window) {
+        requestIdleCallback(() => {
+            // Précharger les ressources non critiques
+            preloadResources();
+        });
+    }
+    
+    // Utiliser requestAnimationFrame pour les animations
+    function updateAnimations() {
+        // Mettre à jour les animations basées sur le temps
+        requestAnimationFrame(updateAnimations);
+    }
+    updateAnimations();
+    
+    // Optimiser les images
+    document.querySelectorAll('img').forEach(img => {
+        img.loading = 'lazy';
+        img.fetchPriority = 'low';
+    });
+}
+
+function preloadResources() {
+    // Précharger les ressources pour les thèmes
+    const themesToPreload = ['home', 'hacker', 'rain', 'anime', 'car'];
+    
+    themesToPreload.forEach(theme => {
+        const link = document.createElement('link');
+        link.rel = 'prefetch';
+        link.href = `assets/${theme}.mp4`;
+        document.head.appendChild(link);
+    });
+}
+
+// Fonction utilitaire : throttling
+function throttle(func, limit) {
+    let inThrottle;
+    return function() {
+        const args = arguments;
+        const context = this;
+        if (!inThrottle) {
+            func.apply(context, args);
+            inThrottle = true;
+            setTimeout(() => inThrottle = false, limit);
+        }
+    };
+}
+
+// Fonction utilitaire : debouncing
+function debounce(func, wait) {
+    let timeout;
+    return function() {
+        const context = this;
+        const args = arguments;
+        clearTimeout(timeout);
+        timeout = setTimeout(() => func.apply(context, args), wait);
+    };
+}
+
+// Charger les préférences utilisateur sauvegardées
+function loadUserPreferences() {
+    const savedVolume = localStorage.getItem('profileVolume');
+    if (savedVolume) {
+        elements.volumeSlider.value = savedVolume;
+        handleVolumeChange();
+    }
+    
+    const savedTransparency = localStorage.getItem('profileTransparency');
+    if (savedTransparency) {
+        elements.transparencySlider.value = savedTransparency;
+        handleTransparencyChange();
+    }
+}
+
+// Exposer certaines fonctions globalement si nécessaire
+window.toggleSkillsView = toggleSkillsView;
+window.switchTheme = switchTheme;
+
+// Initialiser au chargement
+window.addEventListener('DOMContentLoaded', () => {
+    // Charger les préférences avant l'initialisation complète
+    loadUserPreferences();
 });
+
+// Note: La fonction initMedia() est appelée par l'attribut onload dans le HTML
