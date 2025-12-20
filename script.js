@@ -24,23 +24,14 @@ document.addEventListener('DOMContentLoaded', () => {
   const profileBio = document.getElementById('profile-bio');
   const visitorCount = document.getElementById('visitor-count');
   const backgroundMusic = document.getElementById('background-music');
-  const hackerMusic = document.getElementById('hacker-music');
-  const rainMusic = document.getElementById('rain-music');
-  const animeMusic = document.getElementById('anime-music');
-  const carMusic = document.getElementById('car-music');
-  const homeButton = document.getElementById('home-theme');
-  const hackerButton = document.getElementById('hacker-theme');
-  const rainButton = document.getElementById('rain-theme');
-  const animeButton = document.getElementById('anime-theme');
-  const carButton = document.getElementById('car-theme');
+  const tiktokButton = document.getElementById('tiktok-theme');
   const resultsButtonContainer = document.getElementById('results-button-container');
   const resultsButton = document.getElementById('results-theme');
   const volumeIcon = document.getElementById('volume-icon');
   const volumeSlider = document.getElementById('volume-slider');
   const transparencySlider = document.getElementById('transparency-slider');
   const backgroundVideo = document.getElementById('background');
-  const hackerOverlay = document.getElementById('hacker-overlay');
-  const snowOverlay = document.getElementById('snow-overlay');
+  const tiktokOverlay = document.getElementById('tiktok-overlay');
   const glitchOverlay = document.querySelector('.glitch-overlay');
   const profileBlock = document.getElementById('profile-block');
   const skillsBlock = document.getElementById('skills-block');
@@ -358,23 +349,11 @@ document.addEventListener('DOMContentLoaded', () => {
   function switchTheme(videoSrc, audio, themeClass, overlay = null, overlayOverProfile = false) {
     let primaryColor;
     switch (themeClass) {
-      case 'home-theme':
-        primaryColor = '#00CED1';
-        break;
-      case 'hacker-theme':
+      case 'tiktok-theme':
         primaryColor = '#22C55E';
         break;
-      case 'rain-theme':
-        primaryColor = '#1E3A8A';
-        break;
-      case 'anime-theme':
-        primaryColor = '#DC2626';
-        break;
-      case 'car-theme':
-        primaryColor = '#EAB308';
-        break;
       default:
-        primaryColor = '#00CED1';
+        primaryColor = '#22C55E';
     }
     document.documentElement.style.setProperty('--primary-color', primaryColor);
 
@@ -394,26 +373,14 @@ document.addEventListener('DOMContentLoaded', () => {
         currentAudio.muted = isMuted;
         currentAudio.play().catch(err => console.error("Failed to play theme music:", err));
 
-        document.body.classList.remove('home-theme', 'hacker-theme', 'rain-theme', 'anime-theme', 'car-theme');
+        document.body.classList.remove('tiktok-theme');
         document.body.classList.add(themeClass);
 
-        hackerOverlay.classList.add('hidden');
-        snowOverlay.classList.add('hidden');
+        tiktokOverlay.classList.remove('hidden');
         profileBlock.style.zIndex = overlayOverProfile ? 10 : 20;
         skillsBlock.style.zIndex = overlayOverProfile ? 10 : 20;
-        if (overlay) {
-          overlay.classList.remove('hidden');
-        }
 
-        if (themeClass === 'hacker-theme') {
-          resultsButtonContainer.classList.remove('hidden');
-        } else {
-          resultsButtonContainer.classList.add('hidden');
-          skillsBlock.classList.add('hidden');
-          resultsHint.classList.add('hidden');
-          profileBlock.classList.remove('hidden');
-          gsap.to(profileBlock, { x: 0, opacity: 1, duration: 0.5, ease: 'power2.out' });
-        }
+        resultsButtonContainer.classList.remove('hidden');
 
         gsap.to(backgroundVideo, {
           opacity: 1,
@@ -430,44 +397,12 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
 
-  homeButton.addEventListener('click', () => {
-    switchTheme('assets/background.mp4', backgroundMusic, 'home-theme');
+  tiktokButton.addEventListener('click', () => {
+    switchTheme('assets/tiktok.mp4', backgroundMusic, 'tiktok-theme', tiktokOverlay, false);
   });
-  homeButton.addEventListener('touchstart', (e) => {
+  tiktokButton.addEventListener('touchstart', (e) => {
     e.preventDefault();
-    switchTheme('assets/background.mp4', backgroundMusic, 'home-theme');
-  });
-
-  hackerButton.addEventListener('click', () => {
-    switchTheme('assets/hacker_background.mp4', hackerMusic, 'hacker-theme', hackerOverlay, false);
-  });
-  hackerButton.addEventListener('touchstart', (e) => {
-    e.preventDefault();
-    switchTheme('assets/hacker_background.mp4', hackerMusic, 'hacker-theme', hackerOverlay, false);
-  });
-
-  rainButton.addEventListener('click', () => {
-    switchTheme('assets/rain_background.mov', rainMusic, 'rain-theme', snowOverlay, true);
-  });
-  rainButton.addEventListener('touchstart', (e) => {
-    e.preventDefault();
-    switchTheme('assets/rain_background.mov', rainMusic, 'rain-theme', snowOverlay, true);
-  });
-
-  animeButton.addEventListener('click', () => {
-    switchTheme('assets/anime_background.mp4', animeMusic, 'anime-theme');
-  });
-  animeButton.addEventListener('touchstart', (e) => {
-    e.preventDefault();
-    switchTheme('assets/anime_background.mp4', animeMusic, 'anime-theme');
-  });
-
-  carButton.addEventListener('click', () => {
-    switchTheme('assets/car_background.mp4', carMusic, 'car-theme');
-  });
-  carButton.addEventListener('touchstart', (e) => {
-    e.preventDefault();
-    switchTheme('assets/car_background.mp4', carMusic, 'car-theme');
+    switchTheme('assets/tiktok.mp4', backgroundMusic, 'tiktok-theme', tiktokOverlay, false);
   });
 
  
