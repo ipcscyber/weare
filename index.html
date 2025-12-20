@@ -1,333 +1,210 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Portfolio de D3M0N - Développeur & Designer">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="description" content="D3M0N - Developer Profile with Interactive Themes">
     <meta name="theme-color" content="#00CED1">
-    <title>D3M0N - Portfolio</title>
+    <title>D3M0N | Developer Profile</title>
     
-    <!-- Preload fonts critiques -->
-    <link rel="preload" href="assets/Angel_wish.ttf" as="font" type="font/ttf" crossorigin>
+    <!-- Préchargement des ressources critiques -->
+    <link rel="preload" href="assets/tiktok.mp4" as="video" type="video/mp4">
+    <link rel="preload" href="assets/profile.gif" as="image">
     
-    <!-- Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
-    
-    <!-- Styles -->
-    <link rel="stylesheet" href="styles.css">
+    <!-- Préconnexion aux CDN -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     
     <style>
-        @font-face {
-            font-family: 'Angel Wish';
-            src: url('assets/Angel_wish.ttf') format('truetype');
-            font-weight: normal;
-            font-style: normal;
-            font-display: swap;
-        }
+        /* Styles optimisés dans une balise style séparée */
+        /* Ils seront placés à la fin pour éviter le FOUC */
     </style>
-</head>
-<body class="tiktok-theme">
     
-    <!-- Curseur personnalisé -->
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Space+Mono&family=Courier+New&display=swap" rel="stylesheet">
+</head>
+<body class="tiktok-theme" onload="initMedia()">
     <div class="custom-cursor" aria-hidden="true"></div>
 
-    <!-- Écran de démarrage -->
-    <div id="start-screen" role="button" tabindex="0" aria-label="Cliquez pour entrer">
-        <div id="start-text">Cliquez pour entrer...</div>
+    <div id="start-screen" role="dialog" aria-label="Start Screen">
+        <div id="start-text">Click to Enter</div>
     </div>
 
-    <!-- Conteneur principal -->
     <div class="container">
-        
-        <!-- Arrière-plan vidéo -->
-        <video id="background" autoplay loop muted playsinline webkit-playsinline preload="auto" aria-hidden="true">
+        <!-- Optimisation vidéo avec preload et loading -->
+        <video id="background" autoplay loop muted playsinline preload="metadata" loading="lazy" aria-hidden="true">
             <source src="assets/tiktok.mp4" type="video/mp4">
-            Votre navigateur ne supporte pas la vidéo.
+            <source src="assets/tiktok.webm" type="video/webm">
+            Your browser does not support the video tag.
         </video>
 
-        <!-- Overlays d'effets -->
         <div class="glitch-overlay" aria-hidden="true"></div>
         <div id="tiktok-overlay" aria-hidden="true"></div>
-        <div id="hacker-overlay" class="hidden" aria-hidden="true"></div>
-        <div id="snow-overlay" class="hidden" aria-hidden="true"></div>
 
-        <!-- Bloc Profil -->
-        <div id="profile-block" role="main" aria-label="Profil">
+        <!-- Profile Block avec ARIA labels -->
+        <section id="profile-block" role="region" aria-label="Profile Information">
             <div class="profile-header">
-                <div class="profile-container">
-                    <img src="assets/profile.gif" 
-                         alt="Photo de profil de D3M0N" 
-                         class="profile-picture"
-                         loading="eager">
-                </div>
-                
+                <figure class="profile-container">
+                    <img src="assets/profile.gif" alt="D3M0N Profile Picture" class="profile-picture" 
+                         loading="lazy" width="150" height="150">
+                    <figcaption class="visually-hidden">Profile picture with animated border</figcaption>
+                </figure>
                 <div class="profile-info">
                     <div class="name-and-badges">
                         <h1 id="profile-name">D3M0N</h1>
-                        
-                        <div class="badge-box" role="list" aria-label="Badges">
+                        <div class="badge-box" role="list" aria-label="Achievement badges">
                             <div class="badge-box-inner">
                                 <div class="badge-group">
+                                    <!-- Badges avec aria-label pour accessibilité -->
                                     <div class="badge-container" role="listitem">
-                                        <img src="assets/staff.gif" alt="Staff" class="badge">
-                                        <span class="tooltip">Staff Member</span>
+                                        <img src="assets/staff.gif" alt="" class="badge" width="22" height="22">
+                                        <span class="tooltip" role="tooltip">Staff Member</span>
                                     </div>
                                     <div class="badge-container" role="listitem">
-                                        <img src="assets/owner.gif" alt="Owner" class="badge">
-                                        <span class="tooltip">Owner</span>
+                                        <img src="assets/owner.gif" alt="" class="badge" width="22" height="22">
+                                        <span class="tooltip" role="tooltip">Owner</span>
                                     </div>
                                     <div class="badge-container" role="listitem">
-                                        <img src="assets/partner.gif" alt="Partner" class="badge">
-                                        <span class="tooltip">Partner</span>
+                                        <img src="assets/partner.gif" alt="" class="badge" width="22" height="22">
+                                        <span class="tooltip" role="tooltip">Partner</span>
                                     </div>
                                     <div class="badge-container" role="listitem">
-                                        <img src="assets/developer.png" alt="Developer" class="badge">
-                                        <span class="tooltip">Developer</span>
+                                        <img src="assets/developer.png" alt="" class="badge" width="22" height="22">
+                                        <span class="tooltip" role="tooltip">Developer</span>
                                     </div>
                                     <div class="badge-container" role="listitem">
-                                        <img src="assets/bug_bounty.gif" alt="Bug Bounty" class="badge">
-                                        <span class="tooltip">Bug Bounty Hunter</span>
+                                        <img src="assets/bug_bounty.gif" alt="" class="badge" width="22" height="22">
+                                        <span class="tooltip" role="tooltip">Bug Bounty</span>
                                     </div>
                                     <div class="badge-container" role="listitem">
-                                        <img src="assets/hated_guns.gif" alt="Hated by Guns.lol" class="badge">
-                                        <span class="tooltip">Hated by Guns.lol</span>
+                                        <img src="assets/hated_guns.gif" alt="" class="badge" width="22" height="22">
+                                        <span class="tooltip" role="tooltip">Hated by Guns.lol</span>
                                     </div>
                                     <div class="badge-container" role="listitem">
-                                        <img src="assets/premium.png" alt="Premium" class="badge">
-                                        <span class="tooltip">Premium</span>
+                                        <img src="assets/hated_fakecrime.gif" alt="" class="badge" width="22" height="22">
+                                        <span class="tooltip" role="tooltip">Hated by Fakecrime.bio</span>
                                     </div>
                                     <div class="badge-container" role="listitem">
-                                        <img src="assets/verified.gif" alt="Verified" class="badge">
-                                        <span class="tooltip">Verified</span>
+                                        <img src="assets/verified.gif" alt="" class="badge" width="22" height="22">
+                                        <span class="tooltip" role="tooltip">Verified</span>
                                     </div>
                                     <div class="badge-container" role="listitem">
-                                        <img src="assets/1428471793655484488.webp" alt="Certified" class="badge">
-                                        <span class="tooltip">Certified Pro</span>
+                                        <img src="assets/1428471793655484488.webp" alt="" class="badge" width="22" height="22">
+                                        <span class="tooltip" role="tooltip">Verified</span>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    
-                    <p id="profile-bio">
-                        Développeur passionné | Expert en Python, C++ & C# | 
-                        Créateur de solutions innovantes | Toujours à la recherche de nouveaux défis
-                    </p>
+                    <div id="profile-bio" role="article"></div>
                 </div>
             </div>
 
-            <div class="bio-separator" aria-hidden="true"></div>
+            <hr class="bio-separator" aria-hidden="true">
 
-            <div class="profile-footer">
-                <!-- Liens sociaux -->
-                <nav class="social-links" aria-label="Réseaux sociaux">
-                    <a href="https://discord.com/users/1041016337146859561" 
-                       target="_blank" 
-                       rel="noopener noreferrer"
-                       aria-label="Mon profil Discord">
-                        <img src="assets/discord.png" alt="Discord" class="social-icon">
+            <footer class="profile-footer">
+                <div class="social-links" role="navigation" aria-label="Social Media Links">
+                    <a href="https://discord.com/users/1041016337146859561" target="_blank" rel="noopener noreferrer" aria-label="Discord Profile">
+                        <img src="assets/discord.png" alt="Discord" class="social-icon" width="36" height="36">
                     </a>
-                    <a href="https://github.com/ipcscyber" 
-                       target="_blank" 
-                       rel="noopener noreferrer"
-                       aria-label="Mon profil GitHub">
-                        <img src="assets/github.png" alt="GitHub" class="social-icon">
+                    <a href="https://github.com/ipcscyber" target="_blank" rel="noopener noreferrer" aria-label="GitHub Profile">
+                        <img src="assets/github.png" alt="GitHub" class="social-icon" width="36" height="36">
                     </a>
-                    <a href="https://www.youtube.com/@dexxterscripts" 
-                       target="_blank" 
-                       rel="noopener noreferrer"
-                       aria-label="Ma chaîne YouTube">
-                        <img src="assets/youtube.png" alt="YouTube" class="social-icon">
+                    <a href="https://www.youtube.com/@dexxterscripts" target="_blank" rel="noopener noreferrer" aria-label="YouTube Channel">
+                        <img src="assets/youtube.png" alt="YouTube" class="social-icon" width="36" height="36">
                     </a>
-                    <a href="https://www.tiktok.com/@arshibeld" 
-                       target="_blank" 
-                       rel="noopener noreferrer"
-                       aria-label="Mon profil TikTok">
-                        <img src="assets/tiktok.png" alt="TikTok" class="social-icon">
+                    <a href="https://www.tiktok.com/@arshibeld" target="_blank" rel="noopener noreferrer" aria-label="TikTok Profile">
+                        <img src="assets/tiktok.png" alt="TikTok" class="social-icon" width="36" height="36">
                     </a>
-                </nav>
+                </div>
 
-                <!-- Compteur de visiteurs -->
-                <div class="visitor-counter" role="status" aria-label="Compteur de visiteurs">
-                    <svg class="visitor-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+                <div class="visitor-counter" role="status" aria-label="Visitor Counter">
+                    <svg class="visitor-icon" viewBox="0 0 24 24" aria-hidden="true">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
                     </svg>
                     <span id="visitor-count">21234</span>
-                    <span class="tooltip">Vues du profil</span>
+                    <span class="tooltip" role="tooltip">Profile Views</span>
                 </div>
-            </div>
-        </div>
+            </footer>
+        </section>
 
-        <!-- Bloc Compétences -->
-        <section id="skills-block" class="hidden" aria-label="Mes compétences">
-            <h2 class="skills-title">Compétences Techniques</h2>
-            
-            <div class="skill" role="group" aria-label="Compétence Python">
+        <section id="skills-block" class="hidden" role="region" aria-label="Programming Skills">
+            <h2 class="skills-title">Programming Skills</h2>
+            <div class="skill" role="listitem">
                 <div class="skill-name">
-                    <div>
-                        <img src="assets/python.png" alt="Python" class="skill-icon">
-                        <span>Python</span>
-                    </div>
-                    <span aria-label="Niveau: 87%">87%</span>
+                    <img src="assets/python.png" alt="Python" class="skill-icon" width="22" height="22">
+                    <span>Python</span>
+                    <span>87%</span>
                 </div>
-                <div class="skill-bar-container" role="progressbar" aria-valuenow="87" aria-valuemin="0" aria-valuemax="100">
-                    <div id="python-bar" class="skill-bar" style="width: 0%"></div>
+                <div class="skill-bar-container">
+                    <div id="python-bar" class="skill-bar" role="progressbar" aria-valuenow="87" aria-valuemin="0" aria-valuemax="100"></div>
                 </div>
             </div>
-            
-            <div class="skill" role="group" aria-label="Compétence C++">
+            <div class="skill" role="listitem">
                 <div class="skill-name">
-                    <div>
-                        <img src="assets/cpp.png" alt="C++" class="skill-icon">
-                        <span>C++</span>
-                    </div>
-                    <span aria-label="Niveau: 75%">75%</span>
+                    <img src="assets/cpp.png" alt="C++" class="skill-icon" width="22" height="22">
+                    <span>C++</span>
+                    <span>75%</span>
                 </div>
-                <div class="skill-bar-container" role="progressbar" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100">
-                    <div id="cpp-bar" class="skill-bar" style="width: 0%"></div>
+                <div class="skill-bar-container">
+                    <div id="cpp-bar" class="skill-bar" role="progressbar" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100"></div>
                 </div>
             </div>
-            
-            <div class="skill" role="group" aria-label="Compétence C#">
+            <div class="skill" role="listitem">
                 <div class="skill-name">
-                    <div>
-                        <img src="assets/csharp.png" alt="C#" class="skill-icon">
-                        <span>C#</span>
-                    </div>
-                    <span aria-label="Niveau: 80%">80%</span>
+                    <img src="assets/csharp.png" alt="C#" class="skill-icon" width="22" height="22">
+                    <span>C#</span>
+                    <span>80%</span>
                 </div>
-                <div class="skill-bar-container" role="progressbar" aria-valuenow="80" aria-valuemin="0" aria-valuemax="100">
-                    <div id="csharp-bar" class="skill-bar" style="width: 0%"></div>
+                <div class="skill-bar-container">
+                    <div id="csharp-bar" class="skill-bar" role="progressbar" aria-valuenow="80" aria-valuemin="0" aria-valuemax="100"></div>
                 </div>
             </div>
         </section>
 
-        <!-- Bouton Résultats/Profil -->
         <div id="results-button-container" class="hidden">
-            <button id="results-theme" aria-label="Basculer entre profil et compétences">
-                Voir les Compétences
-            </button>
-            <div id="results-hint" class="hidden" role="tooltip">
-                Cliquez à nouveau pour revenir au profil
-            </div>
+            <button id="results-theme" aria-label="Toggle Results View">View Results</button>
+            <div id="results-hint" class="hidden" role="tooltip">Click again to return to profile</div>
         </div>
 
-        <!-- Contrôles de thème -->
-        <nav class="controls" aria-label="Sélection de thème">
-            <button id="home-theme" 
-                    class="theme-button hidden" 
-                    aria-label="Thème Home"
-                    title="Thème Home">H</button>
-            <button id="hacker-theme" 
-                    class="theme-button hidden" 
-                    aria-label="Thème Hacker"
-                    title="Thème Hacker">Hk</button>
-            <button id="rain-theme" 
-                    class="theme-button hidden" 
-                    aria-label="Thème Rain"
-                    title="Thème Rain">R</button>
-            <button id="anime-theme" 
-                    class="theme-button hidden" 
-                    aria-label="Thème Anime"
-                    title="Thème Anime">A</button>
-            <button id="car-theme" 
-                    class="theme-button hidden" 
-                    aria-label="Thème Car"
-                    title="Thème Car">C</button>
-            <button id="tiktok-theme" 
-                    class="theme-button" 
-                    aria-label="Thème TikTok"
-                    title="Thème TikTok">T</button>
-        </nav>
+        <div class="controls" role="toolbar" aria-label="Theme Controls">
+            <button id="tiktok-theme" class="theme-button" aria-label="TikTok Theme">T</button>
+            <button id="home-theme" class="theme-button" aria-label="Home Theme">H</button>
+            <button id="hacker-theme" class="theme-button" aria-label="Hacker Theme">C</button>
+            <button id="rain-theme" class="theme-button" aria-label="Rain Theme">R</button>
+            <button id="anime-theme" class="theme-button" aria-label="Anime Theme">A</button>
+            <button id="car-theme" class="theme-button" aria-label="Car Theme">C</button>
+        </div>
 
-        <!-- Contrôles audio et transparence -->
-        <div class="top-controls" role="group" aria-label="Contrôles audio et transparence">
-            <!-- Contrôle du volume -->
+        <div class="top-controls" role="toolbar" aria-label="Audio and Transparency Controls">
             <div class="volume-control">
-                <button id="volume-icon-button" 
-                        class="volume-icon" 
-                        aria-label="Contrôler le volume"
-                        title="Volume">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <button id="volume-mute" class="volume-icon-button" aria-label="Toggle Mute">
+                    <svg id="volume-icon" class="volume-icon" viewBox="0 0 24 24" aria-hidden="true">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"></path>
                     </svg>
                 </button>
-                <input id="volume-slider" 
-                       class="slider" 
-                       type="range" 
-                       min="0" 
-                       max="1" 
-                       step="0.01" 
-                       value="0.3"
-                       aria-label="Curseur de volume"
-                       aria-valuemin="0"
-                       aria-valuemax="100"
-                       aria-valuenow="30">
+                <input id="volume-slider" class="slider" type="range" min="0" max="1" step="0.01" value="0.3" 
+                       aria-label="Volume Control">
             </div>
-            
-            <!-- Contrôle de la transparence -->
             <div class="transparency-control">
-                <div class="transparency-icon" aria-hidden="true" title="Transparence">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
-                    </svg>
-                </div>
-                <input id="transparency-slider" 
-                       class="slider" 
-                       type="range" 
-                       min="0" 
-                       max="1" 
-                       step="0.01" 
-                       value="0.7"
-                       aria-label="Curseur de transparence"
-                       aria-valuemin="0"
-                       aria-valuemax="100"
-                       aria-valuenow="70">
+                <svg class="transparency-icon" viewBox="0 0 24 24" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                </svg>
+                <input id="transparency-slider" class="slider" type="range" min="0" max="1" step="0.01" value="0.7" 
+                       aria-label="Transparency Control">
             </div>
         </div>
     </div>
 
-    <!-- Audio de fond -->
-    <audio id="background-music" loop preload="auto">
-        <source src="assets/tiktok.mp3" type="audio/mpeg">
-        Votre navigateur ne supporte pas l'élément audio.
+    <audio id="background-music" loop preload="metadata">
+        <source src="assets/tiktok.mp3" type="audio/mp3">
+        <source src="assets/tiktok.ogg" type="audio/ogg">
+        Your browser does not support the audio element.
     </audio>
 
-    <!-- Scripts -->
+    <!-- GSAP et autres scripts en bas de page -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js" defer></script>
     <script src="script.js" defer></script>
-    
-    <!-- Script inline pour détection du touch -->
-    <script>
-        // Détection des appareils tactiles
-        if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
-            document.body.classList.add('touch-device');
-        }
-        
-        // Initialisation du média au chargement
-        function initMedia() {
-            const video = document.getElementById('background');
-            const audio = document.getElementById('background-music');
-            
-            if (video) {
-                video.volume = 0;
-                video.play().catch(e => console.log('Autoplay vidéo bloqué:', e));
-            }
-            
-            if (audio) {
-                audio.volume = 0.3;
-            }
-        }
-        
-        // Démarrer au chargement
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', initMedia);
-        } else {
-            initMedia();
-        }
-    </script>
 </body>
 </html>
-
